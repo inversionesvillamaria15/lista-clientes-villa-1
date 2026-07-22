@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f4f7f6; color: #333; -webkit-tap-highlight-color: transparent; }
+        #encabezado { background: white; padding: 15px; text-align: center; border-bottom: 4px solid #1a73e8; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #encabezado h3 { margin: 0; color: #1a73e8; text-transform: uppercase; font-size: 1.1em; letter-spacing: 1px; }
+        #encabezado p { margin: 5px 0; font-size: 0.8em; color: #666; font-weight: bold; }
+        .filtro-container { margin-top: 10px; padding: 0 10px; }
+        #filtro-poligono { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #1a73e8; background-color: #fff; font-size: 16px; color: #333; outline: none; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231a73e8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 18px; }
+        .card { background: white; margin: 12px; padding: 16px; border-radius: 12px; border-left: 8px solid #d32f2f; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s ease; cursor:pointer; }
+        .card:active { transform: scale(0.98); background-color: #f9f9f9; }
+        .card-general { border-left-color: #2e7d32; }
+        .nombre { font-weight: bold; font-size: 0.95em; text-transform: uppercase; margin-bottom: 6px; color: #222; }
+        .info { font-size: 0.85em; color: #555; margin-top: 2px; }
+        .mora-roja { color: #d32f2f; font-weight: bold; font-size: 0.85em; margin-top: 10px; display: block; }
+        .mora-verde { color: #2e7d32; font-weight: bold; font-size: 0.85em; margin-top: 10px; display: block; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(3px); }
+        .modal-content { background: white; margin: 5% auto; padding: 25px; width: 85%; border-radius: 20px; position: relative; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .close-btn { position: absolute; top: 5px; right: 15px; font-size: 35px; color: #bbb; cursor: pointer; }
+        .modal-header { margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .modal-header h3 { margin: 0; font-size: 1.1em; color: #1a73e8; }
+        .badge-id { font-size: 0.7em; background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 4px; }
+        .alerta-mora { background: #fce8e6; color: #d93025; padding: 10px; text-align: center; border-radius: 8px; font-weight: bold; margin-bottom: 15px; border: 1px solid #fad2cf; }
+        .seccion-detalle { background: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .seccion-detalle h4 { margin: 0 0 8px 0; font-size: 0.85em; color: #5f6368; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .item { font-size: 0.8em; padding: 4px 0; }
+        .item span { display: block; font-size: 0.8em; color: #80868b; }
+        .text-blue { color: #1a73e8; font-weight: bold; }
+        .tel-link { color: #1a73e8; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #1a73e8; }
+        .seccion-saldo { background: #1a73e8; color: white; padding: 15px; border-radius: 10px; text-align: center; margin-top: 15px; }
+        .seccion-saldo span { display: block; font-size: 0.7em; opacity: 0.9; }
+        .monto-saldo { font-size: 1.3em !important; font-weight: bold; opacity: 1 !important; }
+        .btn-documento { display: block; background: #1a73e8; color: white; text-align: center; padding: 16px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 10px; box-shadow: 0 4px 12px rgba(26,115,232,0.3); font-size: 0.9em; border: none; width: 100%; cursor: pointer; }
+        .btn-documento:active { transform: scale(0.98); }
+        .btn-documento:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+        .btn-whatsapp { background-color: #25D366; color: white !important; display: flex; align-items: center; justify-content: center; padding: 12px; margin: 10px 0; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        .btn-telefono { background-color: #007AFF; color: white !important; display: flex; align-items: center; justify-content: center; padding: 12px; margin: 10px 0; border-radius: 8px; text-decoration: none; font-weight: bold;}
+        .caja-motivo { margin-top: 10px; display: none; }
+        .texto-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-family: inherit; font-size: 13px; outline: none; margin-bottom: 8px;}
+        .texto-input:focus { border-color: #1a73e8; }
+        .motivo-display { font-size: 0.95em; color: #334155; margin-bottom: 10px; font-style: italic; background: white; padding: 10px; border-radius: 8px; border-left: 3px solid #f59e0b; }
+        
+        /* Estilos de Edición */
+        .lbl-edit { font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; display: block; }
+        .form-section { background: #e2e8f0; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .form-section h5 { margin: 0 0 10px 0; color: #334155; font-size: 13px; }
+        #vista-edicion { display: none; }
+    </style>
+</head>
+<body>
+    <div id="encabezado">
+        <h3 id="titulo-app">Cargando datos...</h3>
+        <p>Registros encontrados: <span id="contador-numero">0</span></p>
+        <div class="filtro-container">
+            <select id="filtro-poligono"><option value="todos">Cargando polígonos...</option></select>
+        </div>
+    </div>
+
+    <div id="contenedor-principal"></div>
+
+    <div id="miModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarModal()">&times;</span>
+            <div id="detalle-contenido"></div>
+        </div>
+    </div>
+
+    <script>
+        const URL_MORA = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgohELaBU--FF5QzrRJKMB9xO61hgWhRbA_wnnAqK0DD0oMDCX7523ZZjM0WOzPtdNNz8iTupfX1Quzz0HlAZi76aKI6oQrTSPhGvan5ZoKw5gujMVpmP4Ne561UoWUlqGnAM2TiQzIikGzvvMzpq_LVoh7xQIFcva69pomVqZ2KxOY0bN5aMp_qVisCdHPLmGTBCxAmy0ACWT0BsJOl-3_fWwmTISzuhn8o-yLovJNKA7frVeiPpjlpwFz1t_AWT72SpYnE_4SFu2SsQe0suXEFq7kTBpBI0_R7erVscU4XHAtVK8&lib=Mjr2T8QW6uwbyLcwcCA-qeTqWBVgI6Fxz";
+        const URL_DETALLES = "https://script.google.com/macros/s/AKfycbw1GsS15C7LA7e9ap_MQV2eD2bhEutUj0REl6JpfH6I8dczygE68z5-3yS_oaXr_nG8/exec";
+        
+        // --- PEGA AQUÍ TU NUEVO ENLACE CON /EXEC ---
+        const URL_ACTUALIZAR_CLIENTE = "https://script.google.com/macros/s/AKfycbw1GsS15C7LA7e9ap_MQV2eD2bhEutUj0REl6JpfH6I8dczygE68z5-3yS_oaXr_nG8/exec"; 
+
+        const URL_INYECTOR = "https://script.google.com/macros/s/AKfycbyerRzVY8Yk_L2YjfCyTNPH1mrM_a7Y7_1EX_ROcBPY90NrZvMvgS9hcmiYrmmEwyVx-g/exec"; 
+        const URL_GUARDAR_MOTIVO = "https://script.google.com/macros/s/AKfycbxV1ibhHz7rt8HzdmUkrs1Ov8pcrxHGB_DsKcwVrVNdvnmbE5csTlW0r51FBiFlAT0Xpw/exec"; 
+
+        let datosCompletos = [];
+        let listaActualRender = [];
+        let clienteActivoID = ""; // Ahora usamos el ID universalmente para evitar fallos si cambias el lote
+
+        async function fetchSeguro(url) {
+            const response = await fetch(url);
+            return JSON.parse(await response.text());
+        }
+
+        window.onload = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const vista = params.get('vista');
+            document.getElementById('titulo-app').innerText = (vista === 'general') ? 'Lista de Clientes' : 'Clientes en Mora';
+
+            const [listaMora, baseFinanciera, infoClientes, listaMotivos] = await Promise.all([
+                fetchSeguro(URL_MORA), fetchSeguro(URL_DETALLES), fetchSeguro(URL_INYECTOR), fetchSeguro(URL_GUARDAR_MOTIVO + "?action=getMotivos")
+            ]);
+
+            datosCompletos = infoClientes.map(cliente => {
+                const financiera = baseFinanciera.find(f => f.clienteID === cliente.clienteID) || {};
+                const dataMotivo = listaMotivos.find(m => m.poligono === cliente.poligono && m.lote === cliente.lote) || {};
+                return { ...cliente, ...financiera, Motivo: dataMotivo.motivo || "" };
+            });
+
+            listaActualRender = (vista === 'general') ? 
+                datosCompletos.map(c => ({ ID: c.clienteID, Nombre: c.nombre, Poligono: c.poligono, Lote: c.lote, Mora: 0, esGeneral: true, Motivo: c.Motivo })) : 
+                listaMora;
+
+            configurarSpinner(listaActualRender);
+            dibujarCards(listaActualRender);
+        };
+
+        function configurarSpinner(lista) {
+            const selector = document.getElementById('filtro-poligono');
+            const pols = [...new Set(lista.map(i => i.Poligono))].sort();
+            selector.innerHTML = '<option value="todos">-- Todos --</option>';
+            pols.forEach(p => { if(p) selector.innerHTML += `<option value="${p}">Polígono ${p}</option>`; });
+            selector.onchange = (e) => dibujarCards(e.target.value === "todos" ? listaActualRender : listaActualRender.filter(i => i.Poligono == e.target.value));
+        }
+
+        function dibujarCards(lista) {
+            const contenedor = document.getElementById('contenedor-principal');
+            document.getElementById('contador-numero').innerText = lista.length;
+            contenedor.innerHTML = "";
+            lista.forEach(cliente => {
+                const card = document.createElement('div');
+                card.className = cliente.esGeneral ? 'card card-general' : 'card';
+                // Usamos el ID o el Poligono/Lote para buscar
+                let idReal = cliente.ID || cliente.clienteID; 
+                card.onclick = () => mostrarDetalle(idReal, cliente.Poligono, cliente.Lote, cliente.Mora);
+                card.innerHTML = `<div class="nombre">${cliente.Nombre}</div><div class="info">Pol: <b>${cliente.Poligono}</b> | Lote: <b>${cliente.Lote}</b></div>${cliente.esGeneral ? '<div class="mora-verde">ACTIVO</div>' : `<div class="mora-roja">${cliente.Mora} MESES EN MORA</div>`}`;
+                contenedor.appendChild(card);
+            });
+        }
+
+        function mostrarDetalle(id, pol, lote, moraMeses) {
+            // Buscamos por ID o por Pol+Lote
+            const d = datosCompletos.find(item => item.clienteID == id) || datosCompletos.find(item => item.poligono == pol && item.lote == lote);
+            if (!d) return;
+
+            clienteActivoID = d.clienteID; 
+            const linkDrive = (d.urlDrive && d.urlDrive.includes("http")) ? d.urlDrive : null;
+            let telLimpio = d.telefono ? d.telefono.toString().replace(/\D/g, '') : "";
+            let mensajeWA = encodeURIComponent(`Hola ${d.nombre}, le saludamos de la administración de Villa María...`);
+
+            document.getElementById('detalle-contenido').innerHTML = `
+                <div id="vista-lectura">
+                    <div class="modal-header">
+                        <h3>${d.nombre}</h3>
+                        <span class="badge-id">ID: ${d.clienteID || 'S/D'}</span>
+                    </div>
+
+                    ${moraMeses > 0 ? `<div class="alerta-mora">${moraMeses} MESES EN MORA</div>` : ''}
+
+                    <div class="seccion-detalle">
+                        <h4><span class="icon">📍</span> Información Principal</h4>
+                        <div class="grid-2">
+                            <div class="item"><span>Polígono:</span> <b>${d.poligono}</b></div>
+                            <div class="item"><span>Lote:</span> <b>${d.lote}</b></div>
+                            <div class="item"><span>Teléfono:</span> <b>${d.telefono || '-'}</b></div>
+                        </div>
+                    </div>
+
+                    <div class="seccion-detalle">
+                        <h4><span class="icon">💰</span> Financiamiento</h4>
+                        <div class="grid-2">
+                            <div class="item"><span>Precio:</span> <b>${d.precioTotal || '-'}</b></div>
+                            <div class="item"><span>Prima:</span> <b>${d.prima || '-'}</b></div>
+                            <div class="item"><span>Cuota:</span> <b class="text-blue">${d.cuotaMensual || '-'}</b></div>
+                            <div class="item"><span>Plazo:</span> <b>${d.años || '-'} años</b></div>
+                        </div>
+                    </div>
+
+                    <div class="seccion-detalle">
+                        <h4><span class="icon">⚖️</span> Representante Legal</h4>
+                        <div class="grid-2">
+                            <div class="item"><span>Nombre:</span> <b>${d.repLegal || 'N/A'}</b></div>
+                            <div class="item"><span>DUI:</span> <b>${d.repDui || '-'}</b></div>
+                            <div class="item"><span>Teléfono:</span> <b>${d.repTelefono || '-'}</b></div>
+                        </div>
+                    </div>
+
+                    <button class="btn-documento" style="background:#475569;" onclick="abrirEdicionTotal()">✏️ EDITAR TODA LA INFORMACIÓN</button>
+
+                    <div class="seccion-detalle" style="margin-top:20px;">
+                        <h4><span class="icon">📝</span> Motivo de Mora</h4>
+                        <div class="motivo-display" id="motivo-texto">${d.Motivo || 'Sin comentarios.'}</div>
+                        <button class="btn-documento" style="padding: 10px; background: #64748b; margin-top: 5px;" id="btn-mostrar-caja" onclick="abrirCajaMotivo()">Actualizar Motivo</button>
+                        <div class="caja-motivo" id="caja-edicion">
+                            <textarea id="input-motivo" class="texto-input" rows="3">${d.Motivo || ''}</textarea>
+                            <button id="btn-guardar-motivo" class="btn-documento" style="padding: 12px; background: #10b981;" onclick="guardarMotivo('${d.poligono}','${d.lote}')">💾 Guardar Motivo</button>
+                        </div>
+                    </div>
+
+                    <div class="seccion-saldo">
+                        <span>SALDO ACTUAL PENDIENTE:</span>
+                        <span class="monto-saldo">$${d.saldo ? d.saldo.toLocaleString() : '---'}</span>
+                    </div>
+
+                    <a href="https://wa.me/${telLimpio}?text=${mensajeWA}" target="_blank" class="btn-whatsapp">💬 Enviar WhatsApp</a>
+                    <a href="tel:+${telLimpio}" class="btn-telefono">📞 Llamar por Teléfono</a>
+                    ${linkDrive ? `<a href="${linkDrive}" target="_blank" class="btn-documento" style="background:#fff; color:#1a73e8; border:2px solid #1a73e8;">VER PROMESA</a>` : ''}
+                </div>
+
+                <div id="vista-edicion">
+                    <div class="modal-header"><h3>✏️ Modo Edición</h3></div>
+                    
+                    <div class="form-section">
+                        <h5>Datos del Cliente</h5>
+                        <label class="lbl-edit">Nombre</label><input type="text" id="e-nom" class="texto-input" value="${d.nombre}">
+                        <div class="grid-2">
+                            <div><label class="lbl-edit">Polígono</label><input type="text" id="e-pol" class="texto-input" value="${d.poligono}"></div>
+                            <div><label class="lbl-edit">Lote</label><input type="text" id="e-lot" class="texto-input" value="${d.lote}"></div>
+                        </div>
+                        <label class="lbl-edit">Teléfono</label><input type="text" id="e-tel" class="texto-input" value="${d.telefono || ''}">
+                    </div>
+
+                    <div class="form-section">
+                        <h5>Financiamiento</h5>
+                        <div class="grid-2">
+                            <div><label class="lbl-edit">Precio Total</label><input type="text" id="e-precio" class="texto-input" value="${d.precioTotal}"></div>
+                            <div><label class="lbl-edit">Prima</label><input type="text" id="e-prima" class="texto-input" value="${d.prima || ''}"></div>
+                            <div><label class="lbl-edit">Cuota</label><input type="text" id="e-cuota" class="texto-input" value="${d.cuotaMensual}"></div>
+                            <div><label class="lbl-edit">Años Plazo</label><input type="text" id="e-anios" class="texto-input" value="${d.años}"></div>
+                        </div>
+                        <label class="lbl-edit">Condición</label>
+                        <select id="e-condicion" class="texto-input">
+                            <option value="Normal" ${d.condicion == 'Normal' ? 'selected' : ''}>Normal</option>
+                            <option value="SinIntereses" ${d.condicion == 'SinIntereses' ? 'selected' : ''}>Sin Intereses</option>
+                        </select>
+                    </div>
+
+                    <div class="form-section">
+                        <h5>Representante Legal</h5>
+                        <label class="lbl-edit">Nombre Rep.</label><input type="text" id="e-rep-nom" class="texto-input" value="${d.repLegal || ''}">
+                        <div class="grid-2">
+                            <div><label class="lbl-edit">DUI Rep.</label><input type="text" id="e-rep-dui" class="texto-input" value="${d.repDui || ''}"></div>
+                            <div><label class="lbl-edit">Tel. Rep.</label><input type="text" id="e-rep-tel" class="texto-input" value="${d.repTelefono || ''}"></div>
+                        </div>
+                    </div>
+
+                    <button id="btn-guardar-todo" class="btn-documento" style="background: #10b981;" onclick="guardarEdicionTotal()">💾 Guardar Todos los Cambios</button>
+                    <button class="btn-documento" style="background: #ef4444;" onclick="cancelarEdicionTotal()">❌ Cancelar Edición</button>
+                </div>
+            `;
+            document.getElementById('miModal').style.display = "block";
+        }
+
+        // --- FUNCIONES DE INTERFAZ ---
+        function abrirEdicionTotal() {
+            document.getElementById('vista-lectura').style.display = 'none';
+            document.getElementById('vista-edicion').style.display = 'block';
+        }
+
+        function cancelarEdicionTotal() {
+            document.getElementById('vista-edicion').style.display = 'none';
+            document.getElementById('vista-lectura').style.display = 'block';
+        }
+
+        function abrirCajaMotivo() {
+            document.getElementById('btn-mostrar-caja').style.display = 'none';
+            document.getElementById('caja-edicion').style.display = 'block';
+        }
+
+        // --- GUARDADO GENERAL ---
+        function guardarEdicionTotal() {
+            const btnGuardar = document.getElementById('btn-guardar-todo');
+            btnGuardar.innerText = "⏳ Guardando...";
+            btnGuardar.disabled = true;
+
+            const payload = {
+                action: "updateClient",
+                clienteID: clienteActivoID,
+                nombre: document.getElementById('e-nom').value,
+                poligono: document.getElementById('e-pol').value,
+                lote: document.getElementById('e-lot').value,
+                telefono: document.getElementById('e-tel').value,
+                precioTotal: document.getElementById('e-precio').value,
+                prima: document.getElementById('e-prima').value,
+                cuotaMensual: document.getElementById('e-cuota').value,
+                anios: document.getElementById('e-anios').value,
+                condicion: document.getElementById('e-condicion').value,
+                repLegal: document.getElementById('e-rep-nom').value,
+                repDui: document.getElementById('e-rep-dui').value,
+                repTelefono: document.getElementById('e-rep-tel').value
+            };
+
+            fetch(URL_ACTUALIZAR_CLIENTE, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                mode: 'no-cors'
+            }).then(() => {
+                alert("✅ Todos los datos han sido actualizados en la base de datos.");
+                location.reload(); // Recarga para traer la nueva información formateada
+            }).catch(e => {
+                alert("❌ Error de conexión al intentar guardar.");
+                btnGuardar.innerText = "💾 Guardar Todos los Cambios";
+                btnGuardar.disabled = false;
+            });
+        }
+
+        function guardarMotivo(pol, lote) {
+            const nuevoTexto = document.getElementById('input-motivo').value.trim();
+            const btnGuardar = document.getElementById('btn-guardar-motivo');
+            btnGuardar.innerText = "⏳ Guardando..."; btnGuardar.disabled = true;
+
+            fetch(URL_GUARDAR_MOTIVO, {
+                method: 'POST', body: JSON.stringify({ action: "guardarMotivo", poligono: pol, lote: lote, motivo: nuevoTexto }), mode: 'no-cors'
+            }).then(() => {
+                document.getElementById('motivo-texto').innerText = nuevoTexto || "Sin comentarios.";
+                document.getElementById('caja-edicion').style.display = 'none';
+                document.getElementById('btn-mostrar-caja').style.display = 'block';
+                const d = datosCompletos.find(item => item.clienteID == clienteActivoID);
+                if(d) d.Motivo = nuevoTexto;
+                alert("✅ Motivo guardado.");
+            }).finally(() => { btnGuardar.innerText = "💾 Guardar Motivo"; btnGuardar.disabled = false; });
+        }
+
+        function cerrarModal() { document.getElementById('miModal').style.display = "none"; }
+    </script>
+</body>
+</html>
